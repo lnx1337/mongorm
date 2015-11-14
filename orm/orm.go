@@ -1,7 +1,7 @@
 package orm
 
 import (
-	conn "appworkz/mongo/config"
+	conn "github.com/lnx1337/mongorm/config"
 	"fmt"
 	"github.com/astaxie/beego/validation"
 	"github.com/lnx1337/gobase/base/api"
