@@ -19,6 +19,7 @@ type Orm struct {
 }
 
 var Collection *mgo.Collection
+var Sess *mgo.Session
 
 func NewOrm(model interface{}) Orm {
 	var err error
@@ -27,8 +28,9 @@ func NewOrm(model interface{}) Orm {
 
 	conn.Db = self.GetModel("DbName", val)
 	conn.Col = self.GetModel("CollectionName", val)
-
 	conn.InitDb()
+
+	Sess = conn.Sess()
 
 	Collection, err = conn.Collection()
 
@@ -73,6 +75,9 @@ func (self *Orm) FindById(id string) (interface{}, *api.Err) {
 			17,
 		)
 	}
+
+	defer Sess.Close()
+
 	return self.Model, errors
 }
 
@@ -86,6 +91,7 @@ func (self *Orm) FindByCondition(model interface{}, cond interface{}) *api.Err {
 			17,
 		)
 	}
+	defer Sess.Close()
 	return errors
 }
 
@@ -104,6 +110,7 @@ func (self *Orm) FindByPk() (interface{}, *api.Err) {
 			17,
 		)
 	}
+	defer Sess.Close()
 	return self.Model, errors
 }
 
@@ -117,6 +124,7 @@ func (self *Orm) Save() *api.Err {
 			18,
 		)
 	}
+	defer Sess.Close()
 	return errors
 }
 
@@ -143,6 +151,7 @@ func (self *Orm) Update() *api.Err {
 			19,
 		)
 	}
+	defer Sess.Close()
 	return errors
 }
 
@@ -161,6 +170,7 @@ func (self *Orm) Delete() *api.Err {
 			20,
 		)
 	}
+	defer Sess.Close()
 	return errors
 }
 
@@ -173,6 +183,7 @@ func (self *Orm) Validate() *api.Err {
 			errors.SetErr(err.Key, err.Message, 0)
 		}
 	}
+	defer Sess.Close()
 	return errors
 }
 
@@ -188,6 +199,7 @@ func (self *Orm) GetModel(nameMethod string, val reflect.Value) string {
 			}
 		}
 	}
+	defer Sess.Close()
 	return self.snakeString(ind.Type().Name())
 }
 
@@ -201,5 +213,6 @@ func (self *Orm) snakeString(s string) string {
 		j = (d != '_')
 		data = append(data, byte(d))
 	}
+	defer Sess.Close()
 	return strings.ToLower(string(data[:len(data)]))
 }
