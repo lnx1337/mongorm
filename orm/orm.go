@@ -30,7 +30,7 @@ func NewOrm(model interface{}) Orm {
 	conn.Col = self.GetModel("CollectionName", val)
 	conn.InitDb()
 
-	Sess = conn.Sess()
+	Sess = conn.Sess().Copy()
 
 	Collection, err = conn.Collection()
 
