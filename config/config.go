@@ -26,7 +26,6 @@ func InitDb() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	// defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	return
 }

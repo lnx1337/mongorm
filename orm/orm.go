@@ -10,6 +10,8 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
 	"strings"
+	"golang.org/x/net/context"
+	"github.com/guregu/db"
 )
 
 type Orm struct {
@@ -21,6 +23,19 @@ type Orm struct {
 var Collection *mgo.Collection
 var Sess *mgo.Session
 
+func NewOrmWithContext(ctx  context.Context, model interface{}) Orm {
+	self := Orm{Model: model}
+	val := reflect.ValueOf(model)
+
+	d  := self.GetModel("DbName", val)
+	c  := self.GetModel("CollectionName", val)
+
+	Sess = db.MongoDB(ctx,"main")
+	Collection = Sess.DB(d).C(c)
+
+	return self
+}
+
 func NewOrm(model interface{}) Orm {
 	var err error
 	self := Orm{Model: model}
@@ -28,11 +43,11 @@ func NewOrm(model interface{}) Orm {
 
 	conn.Db = self.GetModel("DbName", val)
 	conn.Col = self.GetModel("CollectionName", val)
+	
 	conn.InitDb()
-
 	Sess = conn.Sess().Copy()
 
-	Collection, err = conn.Collection()
+	Collection = Sess.DB(conn.Db).C(conn.Col)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -75,9 +90,6 @@ func (self *Orm) FindById(id string) (interface{}, *api.Err) {
 			17,
 		)
 	}
-
-	defer Sess.Close()
-
 	return self.Model, errors
 }
 
@@ -91,7 +103,6 @@ func (self *Orm) FindByCondition(model interface{}, cond interface{}) *api.Err {
 			17,
 		)
 	}
-	defer Sess.Close()
 	return errors
 }
 
@@ -110,7 +121,6 @@ func (self *Orm) FindByPk() (interface{}, *api.Err) {
 			17,
 		)
 	}
-	defer Sess.Close()
 	return self.Model, errors
 }
 
@@ -124,7 +134,6 @@ func (self *Orm) Save() *api.Err {
 			18,
 		)
 	}
-	defer Sess.Close()
 	return errors
 }
 
@@ -151,7 +160,6 @@ func (self *Orm) Update() *api.Err {
 			19,
 		)
 	}
-	defer Sess.Close()
 	return errors
 }
 
@@ -170,8 +178,11 @@ func (self *Orm) Delete() *api.Err {
 			20,
 		)
 	}
-	defer Sess.Close()
 	return errors
+}
+
+func (self *Orm) Close() {
+	conn.Sess().Close()
 }
 
 func (self *Orm) Validate() *api.Err {
@@ -183,7 +194,6 @@ func (self *Orm) Validate() *api.Err {
 			errors.SetErr(err.Key, err.Message, 0)
 		}
 	}
-	defer Sess.Close()
 	return errors
 }
 
@@ -199,7 +209,6 @@ func (self *Orm) GetModel(nameMethod string, val reflect.Value) string {
 			}
 		}
 	}
-	defer Sess.Close()
 	return self.snakeString(ind.Type().Name())
 }
 
@@ -213,6 +222,5 @@ func (self *Orm) snakeString(s string) string {
 		j = (d != '_')
 		data = append(data, byte(d))
 	}
-	defer Sess.Close()
 	return strings.ToLower(string(data[:len(data)]))
 }
