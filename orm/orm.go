@@ -64,7 +64,7 @@ func (self *Orm) getPkValue() interface{} {
 	var pkValue interface{}
 	if len(self.PkStructField) == 0 {
 		self.PkBson = "_id"
-		pkValue = reflect.ValueOf(self.Model).Elem().FieldByName("Id").Interface().(bson.ObjectId)
+		pkValue = reflect.ValueOf(self.Model).Elem().FieldByName("ID").Interface().(bson.ObjectId)
 	} else {
 		pkValue = reflect.ValueOf(self.Model).Elem().FieldByName(self.PkStructField).Interface().(string)
 	}
