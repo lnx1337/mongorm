@@ -163,6 +163,19 @@ func (self *Orm) Update() *api.Err {
 	return errors
 }
 
+func (self *Orm) UpdateAllByConditions(a, b bson.M) *api.Err {
+	errors := api.NewError()
+	_, err := Collection.UpdateAll(a, b)
+	if err != nil {
+		errors.SetErr(
+			err.Error(),
+			api.ErrMongoUpdate,
+			19,
+		)
+	}
+	return errors
+}
+
 func (self *Orm) Delete() *api.Err {
 	errors := api.NewError()
 	id := self.getPkValue()
