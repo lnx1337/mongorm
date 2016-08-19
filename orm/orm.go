@@ -124,6 +124,22 @@ func (self *Orm) FindByPk() (interface{}, *api.Err) {
 	return self.Model, errors
 }
 
+func (self *Orm) SaveAll(data []interface{}) *api.Err {
+	errors := api.NewError()
+	x := Collection.Bulk() 
+    x.Unordered() //magic! :) 
+	x.Insert(data...)
+	_, err := x.Run()
+	if err != nil {
+		errors.SetErr(
+			err.Error(),
+			api.ErrMongoInsert,
+			18,
+		)
+	}
+	return errors
+}
+
 func (self *Orm) Save() *api.Err {
 	errors := api.NewError()
 	err := Collection.Insert(self.Model)
