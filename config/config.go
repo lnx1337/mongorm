@@ -13,13 +13,19 @@ var Col string
 func InitDb() {
 
 	var err error
+	var urlConection string
 
 	MONGO_HOST := os.Getenv("MONGO_HOST")
 	MONGO_USER := os.Getenv("MONGO_USER")
 	MONGO_PASS := os.Getenv("MONGO_PASS")
 	MONGO_PORT := os.Getenv("MONGO_PORT")
+	MONGO_DATABASE := os.Getenv("MONGO_DATABASE")
 
-	urlConection := fmt.Sprintf("mongodb://%s:%s@%s:%s", MONGO_USER, MONGO_PASS, MONGO_HOST, MONGO_PORT)
+	if len(MONGO_USER) > 0 && len(MONGO_PASS) > 0 {
+		urlConection = fmt.Sprintf("mongodb://%s:%s@%s:%s", MONGO_USER, MONGO_PASS, MONGO_HOST, MONGO_PORT)
+	} else {
+		urlConection = fmt.Sprintf("mongodb://%s:%s/%s", MONGO_HOST, MONGO_PORT, MONGO_DATABASE)
+	}
 
 	session, err = mgo.Dial(urlConection)
 
